@@ -20,7 +20,8 @@ jobs:
             git \
             pkg-config \
             libssl-dev \
-            zlib1g-dev
+            zlib1g-dev \
+            libcurl4-openssl-dev
 
       - name: Build gRPC
         run: |
