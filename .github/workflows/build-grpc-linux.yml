@@ -1,14 +1,15 @@
-name: Build Deps (Linux)
+name: Build gRPC (Linux)
 
 on:
   workflow_dispatch:
 
 jobs:
-  build-linux:
+  build-grpc-linux:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install build tools
         run: |
@@ -20,8 +21,7 @@ jobs:
             git \
             pkg-config \
             libssl-dev \
-            zlib1g-dev \
-            libcurl4-openssl-dev
+            zlib1g-dev
 
       - name: Build gRPC
         run: |
@@ -36,27 +36,13 @@ jobs:
           cmake --build grpc/build
           sudo cmake --install grpc/build
 
-      - name: Build AWS SDK (S3 only)
-        run: |
-          git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp.git
-          cmake -S aws-sdk-cpp -B aws-sdk-cpp/build -GNinja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=/opt/aws \
-            -DBUILD_ONLY=s3 \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DENABLE_TESTING=OFF
-          cmake --build aws-sdk-cpp/build
-          sudo cmake --install aws-sdk-cpp/build
-
-      - name: Package artifacts
+      - name: Package gRPC
         run: |
           tar -czf grpc-v1.66.1-linux-x64.tar.gz -C /opt/grpc .
-          tar -czf aws-sdk-s3-v1.11-linux-x64.tar.gz -C /opt/aws .
 
-      - name: Upload to GitHub Release
+      - name: Upload gRPC to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: deps-v1
           files: |
             grpc-v1.66.1-linux-x64.tar.gz
-            aws-sdk-s3-v1.11-linux-x64.tar.gz
